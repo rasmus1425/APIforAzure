@@ -1,0 +1,37 @@
+import requests
+import os
+
+#Mine credentials
+appid    = 'YOUR APPID'
+secret   = 'YOUR SECRET'
+user     = 'YOUR EMAIL'
+password = 'YOUR PASSWORD' 
+appurl = "https://api.powerbi.com/v1.0/myorg/reports/[ID FOR YOUR REPORT]/Export"
+
+def get_access_token(application_id, application_secret, user_id, user_password):
+    # Get Access Token
+    os.system('clear')
+    data = {
+        'grant_type': 'password',
+        'scope': 'openid',
+        'resource': "https://analysis.windows.net/powerbi/api",
+        'client_id': appid,
+        'client_secret': secret,
+        'username': user,
+        'password': password
+    }
+    token = requests.post("https://login.microsoftonline.com/3307277b-c551-4813-bcf6-7e4ba9caf89f/oauth2/token", data=data)
+    assert token.status_code == 200, "Fail to retrieve token: {}".format(token.text)
+    print("\n BAM - Got new access token \n")
+    return token.json()['access_token']
+
+def get_report(token, urlinput):
+    #API with bearer token from above, downloading report
+    payload = ""
+    headers = {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'}
+    url = urlinput
+    return requests.request("GET", url, data=payload, headers=headers)
+
+# Sende request
+accessToken = get_access_token(appid,secret,user,password)
+response = get_report(accessToken, appurl)
